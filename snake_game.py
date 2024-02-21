@@ -2,6 +2,7 @@
 import curses
 import csv 
 from random import randint
+import numpy as np
 
 class SnakeGame:
     def __init__(self, board_width = 20, board_height = 20, gui = False):
@@ -106,19 +107,57 @@ class SnakeGame:
         raise Exception("Game over")
 
 if __name__ == "__main__":
-    game = SnakeGame(gui = True)
-    game.start()
-    for _ in range(20):
-        game.step(randint(0,3))
 
-    data = game.generate_observations()
-        
     def log_data_to_csv(filename, data):
-        # Open the CSV file in 'append' mode
+    # Open the CSV file in 'append' mode
         with open(filename, 'a', newline='') as csvfile:
             # Create a CSV writer object
             csv_writer = csv.writer(csvfile)
             # Write the data to the CSV file
             csv_writer.writerow(data)
+    header = ["done", "score", "snake", "food", "direction_choice"]
+    log_data_to_csv(filename='./data.csv', data=header)
+
+    NUMBER_OF_EXAMPLES = 1
+
+    for i in range(NUMBER_OF_EXAMPLES):
+        game_history = []
+
+        # counter to see data creation progress
+        print(i, "/ 5000")
+
+        # initialize game
+        game = SnakeGame(gui = False)
+        game.start()
+
+        hasError = False 
+
+        # initialize the random direction choice
+        randomChoiceDirection = randint(0,3)
+
+        while(not(hasError)):
+            
+            # get current game state and log
+            data = game.generate_observations()
+            # data = data + (randomChoiceDirection,)
+
+            # log_data_to_csv(filename='./data.csv', data=data)
+
+
+            try:
+                randomChoiceDirection = randint(0,3)
+                data = game.step(randomChoiceDirection)
+                data = np.array(data, dtype=object)
+                data = np.append(data, randomChoiceDirection)
+                game_history.append(data)
+
+                # log_data_to_csv(filename='./data.csv', data=data)
+            except:
+                print('ended')
+                hasError = True
+
+        print(game_history)
+
+
     
-    log_data_to_csv(filename='./data.csv', data=data)
+        
