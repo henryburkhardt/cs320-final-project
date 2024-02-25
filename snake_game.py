@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*- 
 import curses
-import csv 
 from random import randint
+import csv
 import numpy as np
 
+
 class SnakeGame:
-    def __init__(self, board_width = 20, board_height = 20, gui = False):
+    def __init__(self, board_width=20, board_height=20, gui=False):
         self.score = 0
         self.done = False
         self.board = {'width': board_width, 'height': board_height}
         self.gui = gui
+        self.direction = -1
+        self.board_matrix = np.zeros((self.board['width'], self.board['height']))
 
     def start(self):
         self.snake_init()
@@ -21,10 +24,12 @@ class SnakeGame:
         x = randint(5, self.board["width"] - 5)
         y = randint(5, self.board["height"] - 5)
         self.snake = []
-        vertical = randint(0,1) == 0
+        vertical = randint(0, 1) == 0
+        self.direction = 1 if vertical else 2
         for i in range(3):
             point = [x + i, y] if vertical else [x, y + i]
             self.snake.insert(0, point)
+            self.board_matrix[point[0], point[1]] = 1
 
     def generate_food(self):
         food = []
@@ -59,6 +64,7 @@ class SnakeGame:
         # 1 - RIGHT
         # 2 - DOWN
         # 3 - LEFT
+        self.direction = key
         if self.done == True: self.end_game()
         self.create_new_point(key)
         if self.food_eaten():
@@ -81,23 +87,56 @@ class SnakeGame:
         elif key == 3:
             new_point[1] -= 1
         self.snake.insert(0, new_point)
+        self.board_matrix[new_point[0], new_point[1]] = 1
 
     def remove_last_point(self):
-        self.snake.pop()
+        last_point = self.snake.pop()
+        self.board_matrix[last_point[0], last_point[1]] = 0
 
     def food_eaten(self):
         return self.snake[0] == self.food
 
     def check_collisions(self):
-        if (self.snake[0][0] == 0 or
-            self.snake[0][0] == self.board["width"] + 1 or
-            self.snake[0][1] == 0 or
-            self.snake[0][1] == self.board["height"] + 1 or
-            self.snake[0] in self.snake[1:-1]):
+
+        # conditions that make the snake die
+
+        # Check for duplicates
+        arr_tuples = [tuple(x) for x in self.snake]
+        has_duplicates = len(arr_tuples) != len(set(arr_tuples))
+
+        if (
+                has_duplicates or
+                self.snake[0][0] == 0 or  # head of snake is 0
+                self.snake[0][0] == self.board["width"] + 1 or  # head of snake crosses outside borders
+                self.snake[0][1] == 0 or self.snake[0][1] == self.board["height"] + 1 or self.snake[0] in self.snake[
+                                                                                                          1:-1]):
             self.done = True
 
     def generate_observations(self):
         return self.done, self.score, self.snake, self.food
+
+    def get_cell_value_safe(self, x, y):
+        try:
+            value = self.board_matrix[x][y]
+            return value
+        except IndexError:
+            return 1
+
+    def generate_vision_array(self):
+        headX, headY = self.snake[0]
+        if self.direction < 0: return [None, None, None, None]
+
+        north_cell = self.get_cell_value_safe(headX - 1, headY)
+        south_cell = self.get_cell_value_safe(headX + 1, headY)
+        west_cell = self.get_cell_value_safe(headX, headY + 1)
+        east_cell = self.get_cell_value_safe(headX, headY - 1)
+
+        # from snake Head POV, format of the array is [N,E,S,W]
+        if self.direction == 0: return [north_cell, east_cell, south_cell, west_cell]
+        if self.direction == 1: return [east_cell, south_cell, west_cell, north_cell]
+        if self.direction == 2: return [south_cell, west_cell, north_cell, east_cell]
+        if self.direction == 3: return [west_cell, north_cell, east_cell, south_cell]
+
 
     def render_destroy(self):
         curses.endwin()
@@ -106,58 +145,51 @@ class SnakeGame:
         if self.gui: self.render_destroy()
         raise Exception("Game over")
 
+
 if __name__ == "__main__":
+    with open('output.csv', 'w') as file:
+        pass
 
-    def log_data_to_csv(filename, data):
-    # Open the CSV file in 'append' mode
-        with open(filename, 'a', newline='') as csvfile:
-            # Create a CSV writer object
-            csv_writer = csv.writer(csvfile)
-            # Write the data to the CSV file
-            csv_writer.writerow(data)
-    header = ["done", "score", "snake", "food", "direction_choice"]
-    log_data_to_csv(filename='./data.csv', data=header)
+    with open('matrix_output.txt', 'w') as file:
+        pass
 
-    NUMBER_OF_EXAMPLES = 1
+    game = SnakeGame(gui=True, board_width=10, board_height=10)
+    game.start()
 
-    for i in range(NUMBER_OF_EXAMPLES):
-        game_history = []
+    move_history = [['move_index', 'dead', 'score', 'snake', 'visionN', 'visionE', 'visionS', 'visionW', 'directionChoice']]
 
-        # counter to see data creation progress
-        print(i, "/ 5000")
+    n = 0
 
-        # initialize game
-        game = SnakeGame(gui = False)
-        game.start()
+    gameOver = False
 
-        hasError = False 
+    while not gameOver:
+        # get current state and write to file
+        directionChoice = randint(0, 3)
 
-        # initialize the random direction choice
-        randomChoiceDirection = randint(0,3)
+        done, score, snake, food = game.generate_observations()
+        [visionN, visionE, visionS, visionW] = game.generate_vision_array()
 
-        while(not(hasError)):
-            
-            # get current game state and log
-            data = game.generate_observations()
-            # data = data + (randomChoiceDirection,)
+        data = [n, done, score, snake, visionN, visionE, visionS, visionW, directionChoice, game.direction]
+        move_history.append(data)
 
-            # log_data_to_csv(filename='./data.csv', data=data)
+        # Write matrix to file
+        with open('matrix_output.txt', 'a') as file:
+            file.write(str("------- MOVE " + str(n) + " ------- \n"))
+            np.savetxt(file, game.board_matrix, fmt='%d', delimiter=' ', newline="\n")
 
+        # iterate game by one step
+        try:
+            game.step(directionChoice)
+        except:
+            gameOver = True
+            print("snake has died")
 
-            try:
-                randomChoiceDirection = randint(0,3)
-                data = game.step(randomChoiceDirection)
-                data = np.array(data, dtype=object)
-                data = np.append(data, randomChoiceDirection)
-                game_history.append(data)
+        n+=1
 
-                # log_data_to_csv(filename='./data.csv', data=data)
-            except:
-                print('ended')
-                hasError = True
+    with open('output.csv', mode='w', newline='') as file:
+        # Create a CSV writer object
+        writer = csv.writer(file)
+        # Write headers
+        for row in move_history:
+            writer.writerow(row)
 
-        print(game_history)
-
-
-    
-        
