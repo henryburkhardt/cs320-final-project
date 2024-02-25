@@ -64,7 +64,13 @@ class SnakeGame:
         # 1 - RIGHT
         # 2 - DOWN
         # 3 - LEFT
+
+        # prevent snake from running back on itself
+        if abs(self.direction - key) == 2:
+            key = self.direction
+
         self.direction = key
+
         if self.done == True: self.end_game()
         self.create_new_point(key)
         if self.food_eaten():
@@ -118,16 +124,17 @@ class SnakeGame:
             value = self.board_matrix[x][y]
             return value
         except IndexError:
-            return 1
+            return 1.0
 
     def generate_vision_array(self):
         headX, headY = self.snake[0]
+
         if self.direction < 0: return [None, None, None, None]
 
         north_cell = self.get_cell_value_safe(headX - 1, headY)
         south_cell = self.get_cell_value_safe(headX + 1, headY)
-        west_cell = self.get_cell_value_safe(headX, headY + 1)
-        east_cell = self.get_cell_value_safe(headX, headY - 1)
+        west_cell = self.get_cell_value_safe(headX, headY - 1)
+        east_cell = self.get_cell_value_safe(headX, headY + 1)
 
         # from snake Head POV, format of the array is [N,E,S,W]
         if self.direction == 0: return [north_cell, east_cell, south_cell, west_cell]
@@ -150,14 +157,24 @@ if __name__ == "__main__":
     with open('matrix_output.txt', 'w') as file:
         pass
 
-    game = SnakeGame(gui=False, board_width=10, board_height=10)
+    game = SnakeGame(gui=True, board_width=10, board_height=10)
     game.start()
 
     move_history = []
 
+    possible_directions = [0, 1, 2, 3]
+
     n = 0
 
     gameOver = False
+
+    with open('output.csv', mode='a', newline='') as file:
+        # Create a CSV writer object
+        writer = csv.writer(file)
+        # Write headers
+        writer.writerow(
+            ['n', 'gameOver', 'food', 'score', 'snakeHead', 'snakeCells', 'visionN', 'visionE', 'visionS', 'visionW',
+             'directionChoice', 'directionCurrent'])
 
     while not gameOver:
         directionChoice = randint(0, 3)
@@ -166,13 +183,8 @@ if __name__ == "__main__":
 
         [visionN, visionE, visionS, visionW] = game.generate_vision_array()
 
-        data = [n, done, score, snake, visionN, visionE, visionS, visionW, directionChoice, game.direction]
-
-        with open('output.csv', mode='a', newline='') as file:
-            # Create a CSV writer object
-            writer = csv.writer(file)
-            # Write headers
-            writer.writerow(data)
+        data = [n, done, game.food, score, snake[0], snake, visionN, visionE, visionS, visionW, directionChoice,
+                game.direction]
 
         # Write matrix to file
         with open('matrix_output.txt', 'a') as file:
@@ -186,6 +198,10 @@ if __name__ == "__main__":
             gameOver = True
             print("snake has died")
 
+        with open('output.csv', mode='a', newline='') as file:
+            # Create a CSV writer object
+            writer = csv.writer(file)
+            # Write headers
+            writer.writerow(data)
+
         n += 1
-
-
