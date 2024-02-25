@@ -25,7 +25,7 @@ class SnakeGame:
         y = randint(5, self.board["height"] - 5)
         self.snake = []
         vertical = randint(0, 1) == 0
-        self.direction = 1 if vertical else 2
+        self.direction = 2 if vertical else 1
         for i in range(3):
             point = [x + i, y] if vertical else [x, y + i]
             self.snake.insert(0, point)
@@ -100,13 +100,11 @@ class SnakeGame:
 
         # conditions that make the snake die
 
-        # Check for duplicates
+        # Check for duplicates - representing whether the snake has run into itself or not
         arr_tuples = [tuple(x) for x in self.snake]
         has_duplicates = len(arr_tuples) != len(set(arr_tuples))
 
-        if (
-                has_duplicates or
-                self.snake[0][0] == 0 or  # head of snake is 0
+        if (has_duplicates or self.snake[0][0] == 0 or  # head of snake is 0
                 self.snake[0][0] == self.board["width"] + 1 or  # head of snake crosses outside borders
                 self.snake[0][1] == 0 or self.snake[0][1] == self.board["height"] + 1 or self.snake[0] in self.snake[
                                                                                                           1:-1]):
@@ -137,7 +135,6 @@ class SnakeGame:
         if self.direction == 2: return [south_cell, west_cell, north_cell, east_cell]
         if self.direction == 3: return [west_cell, north_cell, east_cell, south_cell]
 
-
     def render_destroy(self):
         curses.endwin()
 
@@ -153,24 +150,29 @@ if __name__ == "__main__":
     with open('matrix_output.txt', 'w') as file:
         pass
 
-    game = SnakeGame(gui=True, board_width=10, board_height=10)
+    game = SnakeGame(gui=False, board_width=10, board_height=10)
     game.start()
 
-    move_history = [['move_index', 'dead', 'score', 'snake', 'visionN', 'visionE', 'visionS', 'visionW', 'directionChoice']]
+    move_history = []
 
     n = 0
 
     gameOver = False
 
     while not gameOver:
-        # get current state and write to file
         directionChoice = randint(0, 3)
 
         done, score, snake, food = game.generate_observations()
+
         [visionN, visionE, visionS, visionW] = game.generate_vision_array()
 
         data = [n, done, score, snake, visionN, visionE, visionS, visionW, directionChoice, game.direction]
-        move_history.append(data)
+
+        with open('output.csv', mode='a', newline='') as file:
+            # Create a CSV writer object
+            writer = csv.writer(file)
+            # Write headers
+            writer.writerow(data)
 
         # Write matrix to file
         with open('matrix_output.txt', 'a') as file:
@@ -184,12 +186,6 @@ if __name__ == "__main__":
             gameOver = True
             print("snake has died")
 
-        n+=1
+        n += 1
 
-    with open('output.csv', mode='w', newline='') as file:
-        # Create a CSV writer object
-        writer = csv.writer(file)
-        # Write headers
-        for row in move_history:
-            writer.writerow(row)
 
