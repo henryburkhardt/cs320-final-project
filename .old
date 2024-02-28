@@ -159,5 +159,14 @@ if __name__ == "__main__":
         print(game_history)
 
 
+# # from snake Head POV, format of the array is [N,E,S,W] -
+        # No longer using this because I don't think it needs to be relative
+        #
+        #
+        # if self.direction == 0: return [north_cell, east_cell, south_cell, west_cell]
+        # if self.direction == 1: return [east_cell, south_cell, west_cell, north_cell]
+        # if self.direction == 2: return [south_cell, west_cell, north_cell, east_cell]
+        # if self.direction == 3: return [west_cell, north_cell, east_cell, south_cell]
+
     
         

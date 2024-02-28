@@ -1,11 +1,9 @@
 # adapted from https://github.com/slavadev/snake_nn/blob/master/snake_game.py
 
 import curses
-import json
 from random import randint
 import csv
 import numpy as np
-
 
 class SnakeGame:
     def __init__(self, board_width=20, board_height=20, gui=False):
@@ -128,37 +126,27 @@ class SnakeGame:
         return self.done, self.score, self.snake, self.food
 
     def get_cell_value_safe(self, x, y):
-        try:
-            value = self.board_matrix[x][y]
-            return value
-        except IndexError:
+        if x < 0 or x > self.board['height'] - 1 or y < 0 or y > self.board['width'] - 1:
             return 1.0
+        return self.board_matrix[x][y]
 
     def generate_vision_array(self):
         """
         Generate a len(4) binary array representing whether the cells immediately surrounding the head of the snake
         are filled or unfilled.
-
-        The array is in format [N,E,S,W] from the snakes POV.
-
-        # TODO: decide wether or not to normalize these directions over all snake directions.
-        Right now they are normalized but they might not need to be because directions are absolute.
         """
 
         headX, headY = self.snake[0]
 
+        # make sure direction is actully deinfed
         if self.direction < 0: return [None, None, None, None]
 
-        north_cell = self.get_cell_value_safe(headX - 1, headY)
-        south_cell = self.get_cell_value_safe(headX + 1, headY)
-        west_cell = self.get_cell_value_safe(headX, headY - 1)
-        east_cell = self.get_cell_value_safe(headX, headY + 1)
+        up_cell = self.get_cell_value_safe(headX - 1, headY)
+        down_cell = self.get_cell_value_safe(headX + 1, headY)
+        left_cell = self.get_cell_value_safe(headX, headY - 1)
+        right_cell = self.get_cell_value_safe(headX, headY + 1)
 
-        # from snake Head POV, format of the array is [N,E,S,W]
-        if self.direction == 0: return [north_cell, east_cell, south_cell, west_cell]
-        if self.direction == 1: return [east_cell, south_cell, west_cell, north_cell]
-        if self.direction == 2: return [south_cell, west_cell, north_cell, east_cell]
-        if self.direction == 3: return [west_cell, north_cell, east_cell, south_cell]
+        return [up_cell, right_cell, down_cell, left_cell]
 
     def render_destroy(self):
         curses.endwin()
@@ -168,13 +156,12 @@ class SnakeGame:
         raise Exception("Game over")
 
 
-
 if __name__ == "__main__":
     # options:
-    SHOW_GUI = True
+    SHOW_GUI = False
     BOARD_HEIGHT = 10
     BOARD_WIDTH = 10
-    NUM_GAMES = 2
+    NUM_GAMES = 1
     SAVE_MATRIX = True
 
     # clear output files
@@ -190,30 +177,25 @@ if __name__ == "__main__":
         writer = csv.writer(file)
         # Write headers
         writer.writerow(
-            ['n', 'gameOver', 'food', 'score', 'snakeHead', 'snakeCells', 'visionN', 'visionE', 'visionS', 'visionW',
-             'directionChoice', 'directionCurrent'])
+            ['n', 'gameOver', 'head', 'score', 'visionUp', 'visionRight', 'visionDown', 'visionLeft',
+             'directionChoice'])
 
     for _ in range(NUM_GAMES):
-        # initiate new game
-        game = SnakeGame(gui=SHOW_GUI, board_width=BOARD_WIDTH, board_height=BOARD_HEIGHT)
-        game.start()
-
         n = 0
         gameOver = False
         gameHistory = []
-        snakeHistory = {}
+
+        # initiate a new game
+        game = SnakeGame(gui=SHOW_GUI, board_width=BOARD_WIDTH, board_height=BOARD_HEIGHT)
+        game.start()
+
+        directionChoice = randint(0, 3)
 
         while not gameOver:
-            directionChoice = randint(0, 3)
-
+            # get game state info
             done, score, snake, food = game.generate_observations()
-
-            [visionN, visionE, visionS, visionW] = game.generate_vision_array()
-
-            data = [n, done, game.food, score, snake[0], snake, visionN, visionE, visionS, visionW, directionChoice,
-                    game.direction]
-
-            snakeHistory[str(n)] = snake
+            [visionUp, visionRight, visionDown, visionLeft] = game.generate_vision_array()
+            data = [n, gameOver, game.snake[0], score, visionUp, visionRight, visionDown, visionLeft, directionChoice]
 
             if SAVE_MATRIX:
                 # Write matrix to file
@@ -223,14 +205,25 @@ if __name__ == "__main__":
 
             # iterate game by one step
             try:
+                # SNAKE LIVES:
                 game.step(directionChoice)
+                data[1] = 0 # this sets the gameOver variable to false
+                gameHistory.append(data)
+
             except:
+                # SNAKE DIED:
                 gameOver = True
+                data[1] = 1
+                gameHistory.append(data)
+
+            directionChoice = randint(0, 3)
 
             n += 1
 
-            with open('output.csv', mode='a', newline='') as file:
-                # Create a CSV writer object
-                writer = csv.writer(file)
-                # Write headers
-                writer.writerow(data)
+        with open('output.csv', mode='a', newline='') as file:
+            # Create a CSV writer object
+            writer = csv.writer(file)
+            for move in gameHistory:
+                writer.writerow(move)
+
+        print(gameHistory)
