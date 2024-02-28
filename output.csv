@@ -1,5 +1,0 @@
-n,gameOver,head,score,visionUp,visionRight,visionDown,visionLeft,directionChoice
-0,0,"[5, 7]",0,0.0,0.0,0.0,1.0,1
-1,0,"[5, 8]",0,0.0,0.0,0.0,1.0,3
-2,0,"[5, 9]",0,0.0,1.0,0.0,1.0,2
-3,1,"[6, 9]",0,1.0,1.0,0.0,0.0,1

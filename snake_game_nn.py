@@ -1,5 +1,5 @@
 from tensorflow import keras
-import snake_game
+from game import snake_game
 import numpy as np
 
 loaded_model = keras.saving.load_model("mvp_nn_1.keras")

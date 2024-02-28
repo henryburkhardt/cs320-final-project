@@ -165,14 +165,14 @@ if __name__ == "__main__":
     SAVE_MATRIX = True
 
     # clear output files
-    with open('output.csv', 'w') as file:
+    with open('../data_collection/output.csv', 'w') as file:
         pass
 
-    with open('matrix_output.txt', 'w') as file:
+    with open('../data_collection/matrix_output.txt', 'w') as file:
         pass
 
     # write header line to output csv
-    with open('output.csv', mode='a', newline='') as file:
+    with open('../data_collection/output.csv', mode='a', newline='') as file:
         # Create a CSV writer object
         writer = csv.writer(file)
         # Write headers
@@ -199,7 +199,7 @@ if __name__ == "__main__":
 
             if SAVE_MATRIX:
                 # Write matrix to file
-                with open('matrix_output.txt', 'a') as file:
+                with open('../data_collection/matrix_output.txt', 'a') as file:
                     file.write(str("------- MOVE " + str(n) + " ------- \n"))
                     np.savetxt(file, game.board_matrix, fmt='%d', delimiter=' ', newline="\n")
 
@@ -220,7 +220,7 @@ if __name__ == "__main__":
 
             n += 1
 
-        with open('output.csv', mode='a', newline='') as file:
+        with open('../data_collection/output.csv', mode='a', newline='') as file:
             # Create a CSV writer object
             writer = csv.writer(file)
             for move in gameHistory:
