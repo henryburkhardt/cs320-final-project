@@ -74,3 +74,4 @@ False,0,"[[20, 5], [20, 4], [20, 3]]","[18, 12]",1
 True,0,"[[21, 5], [20, 5], [20, 4]]","[18, 12]",2
 done,score,snake,food,direction_choice
 done,score,snake,food,direction_choice
+done,score,snake,food,direction_choice
