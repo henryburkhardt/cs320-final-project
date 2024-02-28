@@ -1,3 +1,5 @@
+# plays games by randomly choosing directions at each move and records the results in a cs
+
 import sys
 import csv
 from random import randint
@@ -7,14 +9,8 @@ import numpy as np
 sys.path.append('../')
 from game import snake_game
 
-if __name__ == "__main__":
-    # options:
-    SHOW_GUI = False
-    BOARD_HEIGHT = 10
-    BOARD_WIDTH = 10
-    NUM_GAMES = 1
-    SAVE_MATRIX = True
 
+def create_data_random(SHOW_GUI, BOARD_HEIGHT, BOARD_WIDTH, NUM_GAMES, SAVE_MATRIX):
     # clear output files
     with open('output.csv', 'w') as file:
         pass
@@ -30,6 +26,9 @@ if __name__ == "__main__":
         writer.writerow(
             ['n', 'gameOver', 'head', 'score', 'visionUp', 'visionRight', 'visionDown', 'visionLeft',
              'directionChoice'])
+
+    # a nice variable to have, so we can know the total # of moves computed on a run
+    total_moves = 0
 
     for _ in range(NUM_GAMES):
         n = 0
@@ -71,10 +70,24 @@ if __name__ == "__main__":
 
             n += 1
 
+        total_moves += n
+
         with open('output.csv', mode='a', newline='') as file:
             # Create a CSV writer object
             writer = csv.writer(file)
             for move in gameHistory:
                 writer.writerow(move)
 
-        print(gameHistory)
+    print("Successfully played ", NUM_GAMES, "games, consisting of ", total_moves, " moves.")
+
+
+if __name__ == "__main__":
+    # options:
+    create_data_random(
+        SHOW_GUI=False,
+        BOARD_HEIGHT = 10,
+        BOARD_WIDTH = 10,
+        NUM_GAMES = 500,
+        SAVE_MATRIX = True
+        )
+
