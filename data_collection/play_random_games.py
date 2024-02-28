@@ -88,6 +88,6 @@ if __name__ == "__main__":
         BOARD_HEIGHT = 10,
         BOARD_WIDTH = 10,
         NUM_GAMES = 500,
-        SAVE_MATRIX = True
+        SAVE_MATRIX = False
         )
 
