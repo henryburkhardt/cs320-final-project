@@ -84,10 +84,4 @@ def create_data_random(SHOW_GUI, BOARD_HEIGHT, BOARD_WIDTH, NUM_GAMES, SAVE_MATR
 if __name__ == "__main__":
     # options:
     create_data_random(
-        SHOW_GUI=False,
-        BOARD_HEIGHT = 10,
-        BOARD_WIDTH = 10,
-        NUM_GAMES = 500,
-        SAVE_MATRIX = False
-        )
-
+        SHOW_GUI=False, BOARD_HEIGHT=15, BOARD_WIDTH=15, NUM_GAMES=50000, SAVE_MATRIX=False)
