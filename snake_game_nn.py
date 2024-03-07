@@ -20,14 +20,14 @@ while not gameOver:
         direction[i] = 1
         state = np.array([direction + visionState])
         state = state.reshape((1,8))
-        print(state)
-        # pred = loaded_model.predict(state, verbose=0)
-        # direction_scores.append(pred)
+        # print(state)
+        pred = loaded_model.predict(state, verbose=0)
+        direction_scores.append(pred)
 
-    # best_direction = np.argmax(direction_scores, axis=0)
-    # print(best_direction)
-    # try:
-    #     game.step(best_direction)
-    # except:
-    #     gameOver = True
-    #     # print("game over")
+    best_direction = np.argmax(direction_scores, axis=0)
+    print(best_direction)
+    try:
+        game.step(best_direction)
+    except:
+        gameOver = True
+        # print("game over")

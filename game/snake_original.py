@@ -5,13 +5,13 @@ import curses
 from random import randint
 import numpy as np
 
+
 class SnakeGame:
     def __init__(self, board_width=20, board_height=20, gui=False):
         self.score = 0
         self.done = False
         self.board = {'width': board_width, 'height': board_height}
         self.gui = gui
-        self.direction = -1
 
         # matrix representation of the whole board
         self.board_matrix = np.zeros((self.board['width'], self.board['height']))
@@ -73,11 +73,6 @@ class SnakeGame:
         # the exact opposite of current direction, do not change direction.
         # This reflects original game behaviours.-Henry
 
-        if abs(self.direction - key) == 2:
-            key = self.direction
-
-        self.direction = key
-
         if self.done == True: self.end_game()
         self.create_new_point(key)
         if self.food_eaten():
@@ -113,13 +108,12 @@ class SnakeGame:
 
         # Check for duplicates - representing whether the snake has run into itself or not.
         # This makes the snake die- same as original game.
-        arr_tuples = [tuple(x) for x in self.snake]
-        has_duplicates = len(arr_tuples) != len(set(arr_tuples))
 
-        if (has_duplicates or self.snake[0][0] == 0 or  # head of snake is 0
+        if (    self.snake[0][0] == 0 or  # head of snake is 0
                 self.snake[0][0] == self.board["width"] + 1 or  # head of snake crosses outside borders
-                self.snake[0][1] == 0 or self.snake[0][1] == self.board["height"] + 1 or self.snake[0] in self.snake[
-                                                                                                          1:-1]):
+                self.snake[0][1] == 0 or
+                self.snake[0][1] == self.board["height"] + 1 or
+                self.snake[0] in self.snake[1:-1]):
             self.done = True
 
     def generate_observations(self):
@@ -154,76 +148,3 @@ class SnakeGame:
     def end_game(self):
         if self.gui: self.render_destroy()
         raise Exception("Game over")
-
-
-# if __name__ == "__main__":
-#     # options:
-#     SHOW_GUI = False
-#     BOARD_HEIGHT = 10
-#     BOARD_WIDTH = 10
-#     NUM_GAMES = 1
-#     SAVE_MATRIX = True
-#
-#     # clear output files
-#     with open('../data_collection/training_set_1.csv', 'w') as file:
-#         pass
-#
-#     with open('../data_collection/matrix_output.txt', 'w') as file:
-#         pass
-#
-#     # write header line to output csv
-#     with open('../data_collection/training_set_1.csv', mode='a', newline='') as file:
-#         # Create a CSV writer object
-#         writer = csv.writer(file)
-#         # Write headers
-#         writer.writerow(
-#             ['n', 'gameOver', 'head', 'score', 'visionUp', 'visionRight', 'visionDown', 'visionLeft',
-#              'directionChoice'])
-#
-#     for _ in range(NUM_GAMES):
-#         n = 0
-#         gameOver = False
-#         gameHistory = []
-#
-#         # initiate a new game
-#         game = SnakeGame(gui=SHOW_GUI, board_width=BOARD_WIDTH, board_height=BOARD_HEIGHT)
-#         game.start()
-#
-#         directionChoice = randint(0, 3)
-#
-#         while not gameOver:
-#             # get game state info
-#             done, score, snake, food = game.generate_observations()
-#             [visionUp, visionRight, visionDown, visionLeft] = game.generate_vision_array()
-#             data = [n, gameOver, game.snake[0], score, visionUp, visionRight, visionDown, visionLeft, directionChoice]
-#
-#             if SAVE_MATRIX:
-#                 # Write matrix to file
-#                 with open('../data_collection/matrix_output.txt', 'a') as file:
-#                     file.write(str("------- MOVE " + str(n) + " ------- \n"))
-#                     np.savetxt(file, game.board_matrix, fmt='%d', delimiter=' ', newline="\n")
-#
-#             # iterate game by one step
-#             try:
-#                 # SNAKE LIVES:
-#                 game.step(directionChoice)
-#                 data[1] = 0 # this sets the gameOver variable to false
-#                 gameHistory.append(data)
-#
-#             except:
-#                 # SNAKE DIED:
-#                 gameOver = True
-#                 data[1] = 1
-#                 gameHistory.append(data)
-#
-#             directionChoice = randint(0, 3)
-#
-#             n += 1
-#
-#         with open('../data_collection/training_set_1.csv', mode='a', newline='') as file:
-#             # Create a CSV writer object
-#             writer = csv.writer(file)
-#             for move in gameHistory:
-#                 writer.writerow(move)
-#
-#         print(gameHistory)
