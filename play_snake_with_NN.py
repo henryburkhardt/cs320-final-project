@@ -2,7 +2,7 @@ from tensorflow import keras
 from game import snake_game
 import numpy as np
 
-loaded_model = keras.saving.load_model("./models/possible_mvp.keras")
+loaded_model = keras.saving.load_model("archicve/possible_mvp.keras")
 
 SHOW_GUI = True
 BOARD_WIDTH = 15
