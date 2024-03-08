@@ -1,6 +1,10 @@
+import sys
 import numpy as np
-from game import snake_game_2
 import csv
+from tqdm import tqdm
+
+sys.path.append('..')
+from game import snake_game_2
 
 
 def generate_row(observation: np.ndarray, direction_choice: int, game_over: int):
@@ -16,13 +20,12 @@ def game_loop(limit_moves, use_logic=False, use_gui=False):
     move_killed_snake = False
 
     while (not move_killed_snake) and n_moves <= limit_moves:
-        if game.game_over: print("GAME OVER")
-        direction_choice = np.random.randint(0, 3)
+        direction_choice = np.random.choice([-1, 0, 1])
         obs = np.array(game.generate_observation())
 
         if use_logic:
             possible_directions = np.where(obs == 0)[0]
-            direction_choice = np.random.choice(possible_directions)
+            direction_choice = np.random.choice(possible_directions) - 1
 
         game.change_direction_choose(direction_choice)
         game.move()
@@ -31,7 +34,6 @@ def game_loop(limit_moves, use_logic=False, use_gui=False):
 
         move_row = generate_row(obs, direction_choice, move_killed_snake)
         game_history.append(move_row)
-        # print(move_row)
         n_moves += 1
     return game_history
 
@@ -56,17 +58,17 @@ def write_game_to_csv(filename, game_history):
 
 
 def play_games_with_logic(num_games, f):
-    for i in range(num_games):
+    print("Playing {} games with logic...".format(num_games))
+    for i in tqdm(range(num_games)):
         current_game_history = game_loop(use_logic=True, limit_moves=100, use_gui=False)
         write_game_to_csv(f, current_game_history)
-        print("Game ", i, " complete")
 
 
 def play_games_with_random(num_games, f):
-    for i in range(num_games):
+    print("Playing {} games with random guess...".format(num_games))
+    for i in tqdm(range(num_games)):
         current_game_history = game_loop(use_logic=False, limit_moves=100, use_gui=False)
         write_game_to_csv(f, current_game_history)
-        print("Game ", i, " complete")
 
 
 if __name__ == "__main__":
