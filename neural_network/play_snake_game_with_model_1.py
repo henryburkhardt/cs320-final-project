@@ -1,9 +1,13 @@
 import numpy as np
-from game import snake_game_2
 from tensorflow import keras
 
+import sys
+sys.path.append("..")
+
+from game import snake_game_2
+
 # load saved NN that was trained on colab
-loaded_model = keras.saving.load_model("models/saved_models/model_1.keras")
+loaded_model = keras.saving.load_model("exported_models/model_1.keras")
 
 game = snake_game_2.Game(gui_enabled=True)
 
@@ -24,7 +28,7 @@ def game_loop_GUI():
     game.change_direction_choose(direction_choice)
 
     game.move()
-
+ 
     # logic to run the GUI and show game
     game.canvas.delete("all")
     game.canvas.create_rectangle(game.food.x, game.food.y, game.food.x + game.TILE_SIZE, game.food.y + game.TILE_SIZE,
@@ -52,3 +56,5 @@ def play_with_GUI():
 
 if __name__ == "__main__":
     play_with_GUI()
+
+#%%

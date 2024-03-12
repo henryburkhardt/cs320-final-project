@@ -1,5 +1,6 @@
 # adapted from https://github.com/slavadev/snake_nn/blob/master/snake_game.py
 # contains all game logic and methods to export game state from an active game
+# this is now not our favored GUI, see snake_game_2.py for the better UI
 
 import curses
 from random import randint

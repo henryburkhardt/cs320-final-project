@@ -3,6 +3,7 @@ import random
 import numpy as np
 import csv
 
+#TODO: random food location generation for training?
 
 # global utility functions
 def turn_vector_to_the_left(vector):
@@ -171,6 +172,12 @@ class Game:
         snake_body = self.get_snake_body_coordinates()
         return snake_head, snake_body
 
+    def get_food_coordinates(self):
+        """Get coordinates of food tile"""
+        foodX = self.food.x / self.ROWS
+        foodY = self.food.y / self.COLS
+        return foodX, foodY
+
     def get_snake_direction_vector(self):
         """Get velocity vetor for head of the snake"""
         return [self.velocityX, self.velocityY]
@@ -181,7 +188,7 @@ class Game:
         return (point.tolist() in self.get_snake_body_coordinates() or point[0] == 0 or point[1] == 0
                 or point[0] == self.ROWS or point[1] == self.COLS)
 
-    def generate_observation(self):
+    def generate_observation(self) -> np.array:
         """Check all 3 cells surounding the snake (all possible cells it could travel to) for barriers
         :returns binary array of length three: [barrier_left, barrier_front, barrier_right]
         """

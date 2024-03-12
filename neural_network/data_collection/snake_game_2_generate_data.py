@@ -3,7 +3,7 @@ import numpy as np
 import csv
 from tqdm import tqdm
 
-sys.path.append('..')
+sys.path.append('../..')
 from game import snake_game_2
 
 
