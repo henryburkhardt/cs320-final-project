@@ -34,7 +34,7 @@ class Game:
 
         # GAME parameters
         self.snake = Tile(self.TILE_SIZE * 5, self.TILE_SIZE * 5)  # single tile, snake's head
-        self.food = Tile(self.TILE_SIZE * 10, self.TILE_SIZE * 10)
+        self.food = Tile(self.TILE_SIZE * np.random.randint(low=1, high=self.COLS), self.TILE_SIZE * np.random.randint(low=1, high=self.COLS))
         self.velocityX = 1
         self.velocityY = 0
         self.snake_body = []  # multiple snake tiles
@@ -87,6 +87,21 @@ class Game:
         elif (e.keysym == "Right" and self.velocityX != -1):
             self.velocityX = 1
             self.velocityY = 0
+
+    def get_next_head(self, direction):
+        """Get the next head coordiantes of the snake"""
+        currentDirection = self.get_snake_direction_vector()
+        currentHead = self.get_snake_head_coordinates()
+
+        if direction == -1:
+            newDirection = turn_vector_to_the_left(currentDirection)
+        elif direction == 0:
+            newDirection = currentDirection
+        elif direction == 1:
+            newDirection = turn_vector_to_the_right(currentDirection)
+
+        return [currentHead[0] + newDirection[0], currentHead[1] + newDirection[1]]
+
 
     def change_direction_choose(self, direction):
         """
